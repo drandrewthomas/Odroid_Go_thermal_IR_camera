@@ -30,3 +30,15 @@ Once you've got things wired up and tested, the simplicity of the circuit makes 
 ![A photo of the circuit](https://github.com/drandrewthomas/Odroid_Go_thermal_IR_camera/blob/master/Photos/wiringinside.jpg)
 
 ## Making a 3D printed enclosure
+
+The 'Case 3D model' folder includes a couple of files I used to make a 3D printed enclosure. One is a ready to print STL file, but is designed for the Pimoroni MLX90640 module I used. If that doesn't work for your needs, or the MLX90640 module you have, the OpenSCAD file is included so you can make a custom version. The camera module fits in as shown in the photo above, which also shows the correct orientation for the module. By cutting the veroboard to the right size it fitted perfectly into the back of the enclosure, leaving the header pins properly positioned as shown in the photo below. The veroboard was glued in, and it's necessary to check the pins as the glue goes off to make sure they stay perpendicular to the enclosure.
+
+![A photo of the back of the enclosure showing the header pins glued in](https://github.com/drandrewthomas/Odroid_Go_thermal_IR_camera/blob/master/Photos/caseback.jpg)
+
+## Useful links
+
+Below are some links that may be useful if you decide to build this project.
+
+The Odroid Go Wiki is a useful resource for all Go things: [https://wiki.odroid.com/odroid_go/odroid_go](https://wiki.odroid.com/odroid_go/odroid_go)
+
+The Wiki page for a 16x2 I2C LCD project contains details of how to connect an I2C module to the Go header: [https://wiki.odroid.com/odroid_go/arduino/09_16x2lcd_i2c](https://wiki.odroid.com/odroid_go/arduino/09_16x2lcd_i2c)
