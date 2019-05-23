@@ -16,7 +16,7 @@ If you're using the Arduino IDE method and want to create a firmware file, as de
 
 ## Building the thermal camera module
 
-Building the module is very simple, as it uses just the MLX90640 module, with wires for ground, VCC, SCL and SDA (so just power and i2c). According to the Go wiki the header pinout is as follows, so you can wire the module easily even just using some wires and a breadboard.
+Building the module is very simple, as it uses just the MLX90640 module, with wires for ground, VCC, SCL and SDA (so just power and I2C). According to the Go wiki the header pinout is as follows, so you can wire the module easily even just using some wires and a breadboard.
 
 | Header Pin | Function |
 | ---------- |:--------:|
