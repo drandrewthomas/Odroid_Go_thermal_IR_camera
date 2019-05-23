@@ -42,3 +42,5 @@ Below are some links that may be useful if you decide to build this project.
 The Odroid Go Wiki is a useful resource for all Go things: [https://wiki.odroid.com/odroid_go/odroid_go](https://wiki.odroid.com/odroid_go/odroid_go)
 
 The Wiki page for a 16x2 I2C LCD project contains details of how to connect an I2C module to the Go header: [https://wiki.odroid.com/odroid_go/arduino/09_16x2lcd_i2c](https://wiki.odroid.com/odroid_go/arduino/09_16x2lcd_i2c)
+
+The 3D printed case can also be downloaded from Thingiverse: [https://www.thingiverse.com/thing:3648653](https://www.thingiverse.com/thing:3648653)
