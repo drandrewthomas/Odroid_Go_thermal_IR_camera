@@ -25,3 +25,8 @@ Building the module is very simple, as it uses just the MLX90640 module, with wi
 | 5          | SCL      |
 | 6          | VCC      |
 
+Once you've got things wired up and tested, the simplicity of the circuit makes it very simple to solder up some header pins on a piece of veroboard to make a more robust connector for the Odroid Go header sockets. Below is a photo of how I did that. I put the header pins on top of the veroboard and soldered the wires to the track on the back, which meant the wires didn't obstruct the connection, although you could just use a bigger piece of veroboard too.
+
+![A photo of the circuit](https://github.com/drandrewthomas/Odroid_Go_thermal_IR_camera/blob/master/Photos/wiringinside.jpg)
+
+## Making a 3D printed enclosure
