@@ -160,7 +160,7 @@ void drawtodisplay(bool cls)
   mid=mlx90640To[((23-boxy)*32)+boxx];
   mn=int(mn);
   mx=int(mx+1);
-  if(mn<-30) mn=-30;
+  if(mn<-40) mn=-40;
   if(mx>300) mx=300;
   if(cls==true) GO.lcd.clearDisplay();
   for(y=0;y<24;y++)
