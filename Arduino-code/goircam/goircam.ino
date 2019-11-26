@@ -205,6 +205,15 @@ void drawtodisplay(bool cls)
     GO.lcd.drawFloat(mn,3,255,yoff+(24*yw)-2);
     GO.lcd.setTextColor(WHITE,BLACK);
     GO.lcd.drawFloat(mid,3,255,yoff+((24*yw)/2)+yw);
+
+    for (y=yoff+7; y<yoff+24*yw+7; y++)
+    {
+      col=map(y,yoff,yoff+24*yw,255,0);
+      col=intensity_to_rgb(col);
+      GO.lcd.drawLine(235,y,245,y,col);
+    }
+    GO.lcd.drawRect(234,yoff+7,12,24*yw,WHITE);
+
     GO.lcd.drawRect(xoff+(boxx*xw),yoff+(boxy*yw),xw,yw,WHITE);
     // Draw button labels
     GO.lcd.setTextFont(2);
