@@ -21,8 +21,8 @@ long gottime,firstsave=-1;
 void setup()
 {
   Serial.begin(115200); // MUST BE BEFORE GO.BEGIN()!!!!!
-  serialBT.begin("GO IR Camera");
   GO.begin();
+  serialBT.begin("GO IR Camera");
   Wire.begin(15,4);
   Wire.setClock(400000);
   Serial.println("Starting...");
