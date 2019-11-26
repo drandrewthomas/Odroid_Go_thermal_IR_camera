@@ -142,9 +142,9 @@ void loop()
 
 void drawtodisplay(bool cls)
 {
-  uint16_t c,x,y,ind,val,r,g,b,col,mid;
+  uint16_t c,x,y,ind,r,g,b,col;
   uint16_t xw=10,yw=10,xoff=0,yoff=0;
-  float mn=99999,mx=-99999;
+  float mn=99999,mx=-99999,mid,val;
   if(dooverlay==true)
   {
     xw=7;
@@ -158,8 +158,8 @@ void drawtodisplay(bool cls)
     if(mlx90640To[c]<mn) mn=mlx90640To[c];
   }
   mid=mlx90640To[((23-boxy)*32)+boxx];
-  mn=int(mn);
-  mx=int(mx+1);
+  if (mid<-40) mid=-40;
+  if (mid>300) mid=300;
   if(mn<-40) mn=-40;
   if(mx>300) mx=300;
   if(cls==true) GO.lcd.clearDisplay();
@@ -169,9 +169,11 @@ void drawtodisplay(bool cls)
     {
       ind=(y*32)+x;
       val=mlx90640To[ind];
-      r=int(map(val,int(mn),int(mx),0,255));
+      if (val<-40) val=-40;
+      if (val>300) val=300;
+      r=int(map(int(val*1000),int(mn*1000),int(mx*1000),0,255));
       g=0;
-      b=int(map(val,int(mn),int(mx),255,0));
+      b=int(map(int(val*1000),int(mn*1000),int(mx*1000),255,0));
       col=GO.lcd.color565(r,g,b);
       GO.lcd.fillRect(xoff+(x*xw),yoff+((24*yw)-(y*yw)),xw,yw,col);
     }
@@ -183,11 +185,11 @@ void drawtodisplay(bool cls)
     GO.lcd.setTextSize(1);
     GO.lcd.setTextDatum(ML_DATUM);
     GO.lcd.setTextColor(MAGENTA,BLACK);
-    GO.lcd.drawNumber(int(mx),255,yoff+15);
+    GO.lcd.drawFloat(mx,3,255,yoff+15);
     GO.lcd.setTextColor(CYAN,BLACK);
-    GO.lcd.drawNumber(int(mn),255,yoff+(24*yw)-2);
+    GO.lcd.drawFloat(mn,3,255,yoff+(24*yw)-2);
     GO.lcd.setTextColor(WHITE,BLACK);
-    GO.lcd.drawFloat(mid,1,255,yoff+((24*yw)/2)+yw);
+    GO.lcd.drawFloat(mid,3,255,yoff+((24*yw)/2)+yw);
     GO.lcd.drawRect(xoff+(boxx*xw),yoff+(boxy*yw),xw,yw,WHITE);
     // Draw button labels
     GO.lcd.setTextFont(2);
