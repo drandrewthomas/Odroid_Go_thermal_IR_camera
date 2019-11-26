@@ -23,6 +23,14 @@ void setup()
   Serial.begin(115200); // MUST BE BEFORE GO.BEGIN()!!!!!
   GO.begin();
   serialBT.begin("GO IR Camera");
+
+  // turn speaker off
+  GO.Speaker.setVolume(0);
+  pinMode(25, OUTPUT);
+  digitalWrite(25, LOW);
+  pinMode(26, OUTPUT);
+  digitalWrite(26, LOW);
+
   Wire.begin(15,4);
   Wire.setClock(400000);
   Serial.println("Starting...");
