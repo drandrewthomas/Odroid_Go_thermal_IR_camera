@@ -140,9 +140,25 @@ void loop()
   }
 }
 
+/* map an intensity from 0 to 255 to an RGB value using the NASA/IPAC colors using 6 equal steps */
+uint16_t intensity_to_rgb(uint16_t col)
+{
+  uint16_t r,g,b;
+  switch(col)
+  {
+    case   0 ...  41: r=0; g=0; b=map(col,0,41,20,140); break;
+    case  42 ... 127: r=map(col,41,128,0,255); g=0; b=map(col,41,128,140,10); break;
+    case 128 ... 169: r=255; g=map(col,128,170,0,60); b=map(col,128,170,10,0); break;
+    case 170 ... 212: r=255; g=map(col,170,212,60,235); b=0; break;
+    case 213 ... 255: r=255; g=map(col,212,255,235,255); b=map(col,212,255,0,255); break;
+    default: r=g=b=0; // never happens
+  }
+  return GO.lcd.color565(r,g,b);
+}
+
 void drawtodisplay(bool cls)
 {
-  uint16_t c,x,y,ind,r,g,b,col;
+  uint16_t c,x,y,ind,col;
   uint16_t xw=10,yw=10,xoff=0,yoff=0;
   float mn=99999,mx=-99999,mid,val;
   if(dooverlay==true)
@@ -171,10 +187,9 @@ void drawtodisplay(bool cls)
       val=mlx90640To[ind];
       if (val<-40) val=-40;
       if (val>300) val=300;
-      r=int(map(int(val*1000),int(mn*1000),int(mx*1000),0,255));
-      g=0;
-      b=int(map(int(val*1000),int(mn*1000),int(mx*1000),255,0));
-      col=GO.lcd.color565(r,g,b);
+      // map temp to 0..255
+      col=int(map(int(val*1000),int(mn*1000),int(mx*1000),0,255));
+      col=intensity_to_rgb(col);
       GO.lcd.fillRect(xoff+(x*xw),yoff+((24*yw)-(y*yw)),xw,yw,col);
     }
   }
