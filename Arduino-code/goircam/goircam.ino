@@ -199,11 +199,11 @@ void drawtodisplay(bool cls)
     GO.lcd.setTextFont(2);
     GO.lcd.setTextSize(1);
     GO.lcd.setTextDatum(ML_DATUM);
-    GO.lcd.setTextColor(MAGENTA,BLACK);
-    GO.lcd.drawFloat(mx,3,255,yoff+15);
-    GO.lcd.setTextColor(CYAN,BLACK);
-    GO.lcd.drawFloat(mn,3,255,yoff+(24*yw)-2);
     GO.lcd.setTextColor(WHITE,BLACK);
+    GO.lcd.drawFloat(mx,3,255,yoff+15);
+    GO.lcd.setTextColor(BLUE,BLACK);
+    GO.lcd.drawFloat(mn,3,255,yoff+(24*yw)-2);
+    GO.lcd.setTextColor(GREEN,BLACK);
     GO.lcd.drawFloat(mid,3,255,yoff+((24*yw)/2)+yw);
 
     for (y=yoff+7; y<yoff+24*yw+7; y++)
@@ -214,7 +214,7 @@ void drawtodisplay(bool cls)
     }
     GO.lcd.drawRect(234,yoff+7,12,24*yw,WHITE);
 
-    GO.lcd.drawRect(xoff+(boxx*xw),yoff+(boxy*yw),xw,yw,WHITE);
+    GO.lcd.drawRect(xoff+(boxx*xw),yoff+(boxy*yw),xw,yw,GREEN);
     // Draw button labels
     GO.lcd.setTextFont(2);
     GO.lcd.setTextSize(1);
