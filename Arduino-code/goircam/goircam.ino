@@ -14,9 +14,12 @@ paramsMLX90640 mlx90640;
 
 BluetoothSerial serialBT;
 
+const char *rates[4]={ " .5Hz ", " 1 Hz ", " 2 Hz ", " 4 Hz " };
+
 bool dooverlay=true,saved=false,havesd=false;
 int boxx=16,boxy=12;
 long gottime,firstsave=-1;
+int refresh=3; // 4 Hz by default
 
 void setup()
 {
@@ -44,7 +47,7 @@ void setup()
   status = MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
   if (status != 0)
     Serial.println("Parameter extraction failed");
-  MLX90640_SetRefreshRate(MLX90640_address,0x03);
+  MLX90640_SetRefreshRate(MLX90640_address,refresh);
   if(SD.begin()) havesd=true;
   else Serial.println("Card Mount Failed");
   GO.lcd.setTextFont(4);
@@ -88,6 +91,14 @@ void loop()
     if(dooverlay==true) dooverlay=false;
     else dooverlay=true;
     GO.lcd.clearDisplay();
+    drawtodisplay(true);
+  }
+  if(GO.BtnSelect.isPressed()==1)
+  {
+    refresh=(refresh+1)&3;
+    MLX90640_SetRefreshRate(MLX90640_address,refresh);
+    delay(100 + (500 << refresh));
+    getirframe();
     drawtodisplay(true);
   }
   if(GO.BtnStart.isPressed()==1)
@@ -223,6 +234,8 @@ void drawtodisplay(bool cls)
     GO.lcd.setTextColor(BLACK,WHITE);
     GO.lcd.setTextDatum(ML_DATUM);
     GO.lcd.drawString(" ZOOM ",0,230);
+    GO.lcd.setTextDatum(MC_DATUM);
+    GO.lcd.drawString(rates[refresh],220,230);
     if(saved==false && havesd==true)
     {
       GO.lcd.setTextDatum(MR_DATUM);
