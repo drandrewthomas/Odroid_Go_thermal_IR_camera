@@ -14,15 +14,27 @@ paramsMLX90640 mlx90640;
 
 BluetoothSerial serialBT;
 
+const char *rates[4]={ " .5Hz ", " 1 Hz ", " 2 Hz ", " 4 Hz " };
+
 bool dooverlay=true,saved=false,havesd=false;
 int boxx=16,boxy=12;
 long gottime,firstsave=-1;
+int refresh=3; // 4 Hz by default
 
 void setup()
 {
   Serial.begin(115200); // MUST BE BEFORE GO.BEGIN()!!!!!
-  serialBT.begin("GO IR Camera");
   GO.begin();
+  delay(500);
+  serialBT.begin("GO IR Camera");
+
+  // turn speaker off
+  GO.Speaker.setVolume(0);
+  pinMode(25, OUTPUT);
+  digitalWrite(25, LOW);
+  pinMode(26, OUTPUT);
+  digitalWrite(26, LOW);
+
   Wire.begin(15,4);
   Wire.setClock(400000);
   Serial.println("Starting...");
@@ -35,7 +47,7 @@ void setup()
   status = MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
   if (status != 0)
     Serial.println("Parameter extraction failed");
-  MLX90640_SetRefreshRate(MLX90640_address,0x03);
+  MLX90640_SetRefreshRate(MLX90640_address,refresh);
   if(SD.begin()) havesd=true;
   else Serial.println("Card Mount Failed");
   GO.lcd.setTextFont(4);
@@ -81,6 +93,14 @@ void loop()
     GO.lcd.clearDisplay();
     drawtodisplay(true);
   }
+  if(GO.BtnSelect.isPressed()==1)
+  {
+    refresh=(refresh+1)&3;
+    MLX90640_SetRefreshRate(MLX90640_address,refresh);
+    delay(100 + (500 << refresh));
+    getirframe();
+    drawtodisplay(true);
+  }
   if(GO.BtnStart.isPressed()==1)
   {
     if(saved==false)
@@ -90,16 +110,18 @@ void loop()
       drawtodisplay(true);
     }
   }
+  delay(50);
   if(GO.JOY_Y.isAxisPressed()==1)
   {
     if(boxy<23 && dooverlay==true)
     {
+      while(GO.JOY_Y.isAxisPressed()!=0){GO.update();delay(50);}
       boxy++;
       drawtodisplay(false);
       delay(50);
     }
   }
-  if(GO.JOY_Y.isAxisPressed()==2)
+  else if(GO.JOY_Y.isAxisPressed()==2)
   {
     if(boxy>0 && dooverlay==true)
     {
@@ -109,7 +131,7 @@ void loop()
       delay(50);
     }
   }
-  if(GO.JOY_X.isAxisPressed()==1)
+  else if(GO.JOY_X.isAxisPressed()==1)
   {
     if(boxx<31 && dooverlay==true)
     {
@@ -119,7 +141,7 @@ void loop()
       delay(50);
     }
   }
-  if(GO.JOY_X.isAxisPressed()==2)
+  else if(GO.JOY_X.isAxisPressed()==2)
   {
     if(boxx>0 && dooverlay==true)
     {
@@ -131,11 +153,27 @@ void loop()
   }
 }
 
+/* map an intensity from 0 to 255 to an RGB value using the NASA/IPAC colors using 6 equal steps */
+uint16_t intensity_to_rgb(uint16_t col)
+{
+  uint16_t r,g,b;
+  switch(col)
+  {
+    case   0 ...  41: r=0; g=0; b=map(col,0,41,20,140); break;
+    case  42 ... 127: r=map(col,41,128,0,255); g=0; b=map(col,41,128,140,10); break;
+    case 128 ... 169: r=255; g=map(col,128,170,0,60); b=map(col,128,170,10,0); break;
+    case 170 ... 212: r=255; g=map(col,170,212,60,235); b=0; break;
+    case 213 ... 255: r=255; g=map(col,212,255,235,255); b=map(col,212,255,0,255); break;
+    default: r=g=b=0; // never happens
+  }
+  return GO.lcd.color565(r,g,b);
+}
+
 void drawtodisplay(bool cls)
 {
-  uint16_t c,x,y,ind,val,r,g,b,col,mid;
+  uint16_t c,x,y,ind,col;
   uint16_t xw=10,yw=10,xoff=0,yoff=0;
-  float mn=99999,mx=-99999;
+  float mn=99999,mx=-99999,mid,val;
   if(dooverlay==true)
   {
     xw=7;
@@ -149,9 +187,9 @@ void drawtodisplay(bool cls)
     if(mlx90640To[c]<mn) mn=mlx90640To[c];
   }
   mid=mlx90640To[((23-boxy)*32)+boxx];
-  mn=int(mn);
-  mx=int(mx+1);
-  if(mn<-30) mn=-30;
+  if (mid<-40) mid=-40;
+  if (mid>300) mid=300;
+  if(mn<-40) mn=-40;
   if(mx>300) mx=300;
   if(cls==true) GO.lcd.clearDisplay();
   for(y=0;y<24;y++)
@@ -160,10 +198,11 @@ void drawtodisplay(bool cls)
     {
       ind=(y*32)+x;
       val=mlx90640To[ind];
-      r=int(map(val,int(mn),int(mx),0,255));
-      g=0;
-      b=int(map(val,int(mn),int(mx),255,0));
-      col=GO.lcd.color565(r,g,b);
+      if (val<-40) val=-40;
+      if (val>300) val=300;
+      // map temp to 0..255
+      col=int(map(int(val*1000),int(mn*1000),int(mx*1000),0,255));
+      col=intensity_to_rgb(col);
       GO.lcd.fillRect(xoff+(x*xw),yoff+((24*yw)-(y*yw)),xw,yw,col);
     }
   }
@@ -173,19 +212,30 @@ void drawtodisplay(bool cls)
     GO.lcd.setTextFont(2);
     GO.lcd.setTextSize(1);
     GO.lcd.setTextDatum(ML_DATUM);
-    GO.lcd.setTextColor(MAGENTA,BLACK);
-    GO.lcd.drawNumber(int(mx),255,yoff+15);
-    GO.lcd.setTextColor(CYAN,BLACK);
-    GO.lcd.drawNumber(int(mn),255,yoff+(24*yw)-2);
     GO.lcd.setTextColor(WHITE,BLACK);
-    GO.lcd.drawFloat(mid,1,255,yoff+((24*yw)/2)+yw);
-    GO.lcd.drawRect(xoff+(boxx*xw),yoff+(boxy*yw),xw,yw,WHITE);
+    GO.lcd.drawFloat(mx,3,255,yoff+15);
+    GO.lcd.setTextColor(BLUE,BLACK);
+    GO.lcd.drawFloat(mn,3,255,yoff+(24*yw)-2);
+    GO.lcd.setTextColor(GREEN,BLACK);
+    GO.lcd.drawFloat(mid,3,255,yoff+((24*yw)/2)+yw);
+
+    for (y=yoff+7; y<yoff+24*yw+7; y++)
+    {
+      col=map(y,yoff,yoff+24*yw,255,0);
+      col=intensity_to_rgb(col);
+      GO.lcd.drawLine(235,y,245,y,col);
+    }
+    GO.lcd.drawRect(234,yoff+7,12,24*yw,WHITE);
+
+    GO.lcd.drawRect(xoff+(boxx*xw),yoff+((boxy+1)*yw),xw,yw,GREEN);
     // Draw button labels
     GO.lcd.setTextFont(2);
     GO.lcd.setTextSize(1);
     GO.lcd.setTextColor(BLACK,WHITE);
     GO.lcd.setTextDatum(ML_DATUM);
     GO.lcd.drawString(" ZOOM ",0,230);
+    GO.lcd.setTextDatum(MC_DATUM);
+    GO.lcd.drawString(rates[refresh],220,230);
     if(saved==false && havesd==true)
     {
       GO.lcd.setTextDatum(MR_DATUM);
