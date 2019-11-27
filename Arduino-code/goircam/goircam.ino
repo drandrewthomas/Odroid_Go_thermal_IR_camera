@@ -227,7 +227,7 @@ void drawtodisplay(bool cls)
     }
     GO.lcd.drawRect(234,yoff+7,12,24*yw,WHITE);
 
-    GO.lcd.drawRect(xoff+(boxx*xw),yoff+(boxy*yw),xw,yw,GREEN);
+    GO.lcd.drawRect(xoff+(boxx*xw),yoff+((boxy+1)*yw),xw,yw,GREEN);
     // Draw button labels
     GO.lcd.setTextFont(2);
     GO.lcd.setTextSize(1);
