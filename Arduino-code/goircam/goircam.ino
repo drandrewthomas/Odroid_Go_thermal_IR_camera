@@ -99,16 +99,18 @@ void loop()
       drawtodisplay(true);
     }
   }
+  delay(50);
   if(GO.JOY_Y.isAxisPressed()==1)
   {
     if(boxy<23 && dooverlay==true)
     {
+      while(GO.JOY_Y.isAxisPressed()!=0){GO.update();delay(50);}
       boxy++;
       drawtodisplay(false);
       delay(50);
     }
   }
-  if(GO.JOY_Y.isAxisPressed()==2)
+  else if(GO.JOY_Y.isAxisPressed()==2)
   {
     if(boxy>0 && dooverlay==true)
     {
@@ -118,7 +120,7 @@ void loop()
       delay(50);
     }
   }
-  if(GO.JOY_X.isAxisPressed()==1)
+  else if(GO.JOY_X.isAxisPressed()==1)
   {
     if(boxx<31 && dooverlay==true)
     {
@@ -128,7 +130,7 @@ void loop()
       delay(50);
     }
   }
-  if(GO.JOY_X.isAxisPressed()==2)
+  else if(GO.JOY_X.isAxisPressed()==2)
   {
     if(boxx>0 && dooverlay==true)
     {
