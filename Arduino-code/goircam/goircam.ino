@@ -221,7 +221,7 @@ void drawtodisplay(bool cls)
 
     for (y=yoff+7; y<yoff+24*yw+7; y++)
     {
-      col=map(y,yoff,yoff+24*yw,255,0);
+      col=map(y,yoff+7,yoff+24*yw+7,255,0);
       col=intensity_to_rgb(col);
       GO.lcd.drawLine(235,y,245,y,col);
     }
