@@ -14,15 +14,32 @@ paramsMLX90640 mlx90640;
 
 BluetoothSerial serialBT;
 
+const char *rates[4]={ " .5Hz ", " 1 Hz ", " 2 Hz ", " 4 Hz " };
+// temp scales: auto, outdoor, indoor, body, water, full
+const char *scales[]={ " auto ", " 0-30 ", "15-35 ", "25-42 ", " 0-100", " full " };
+
 bool dooverlay=true,saved=false,havesd=false;
 int boxx=16,boxy=12;
 long gottime,firstsave=-1;
+int refresh=3; // 4 Hz by default
+int scale=0; // auto by default
+int newscale=1;
+float mn=-40,mx=300;
 
 void setup()
 {
   Serial.begin(115200); // MUST BE BEFORE GO.BEGIN()!!!!!
-  serialBT.begin("GO IR Camera");
   GO.begin();
+  delay(500);
+  serialBT.begin("GO IR Camera");
+
+  // turn speaker off
+  GO.Speaker.setVolume(0);
+  pinMode(25, OUTPUT);
+  digitalWrite(25, LOW);
+  pinMode(26, OUTPUT);
+  digitalWrite(26, LOW);
+
   Wire.begin(15,4);
   Wire.setClock(400000);
   Serial.println("Starting...");
@@ -35,15 +52,15 @@ void setup()
   status = MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
   if (status != 0)
     Serial.println("Parameter extraction failed");
-  MLX90640_SetRefreshRate(MLX90640_address,0x03);
+  MLX90640_SetRefreshRate(MLX90640_address,refresh);
   if(SD.begin()) havesd=true;
   else Serial.println("Card Mount Failed");
   GO.lcd.setTextFont(4);
   GO.lcd.setTextColor(WHITE);
   GO.lcd.setTextDatum(MC_DATUM);
 //  GO.lcd.setCursor(160,120);
-  GO.lcd.drawString("IR Camera v1.0",160,120);
-  delay(1000);
+  GO.lcd.drawString("IR Camera v1.1",160,120);
+  delay(500);
   getirframe();
   drawtodisplay(true);
   Serial.println("Setup done");
@@ -72,13 +89,33 @@ void loop()
   {
     getirframe();
     drawtodisplay(true);
+    newscale=0;
   }
+  else
+  {
+    // only change the color scale when button is released
+    newscale=1;
+  }
+
   if(GO.BtnMenu.isPressed()==1)
   {
     while(GO.BtnMenu.isPressed()==1){GO.update();delay(50);}
     if(dooverlay==true) dooverlay=false;
     else dooverlay=true;
     GO.lcd.clearDisplay();
+    drawtodisplay(true);
+  }
+  if(GO.BtnVolume.isPressed()==1)
+  {
+    scale=(scale+1)%(sizeof(scales)/sizeof(scales[0]));
+    drawtodisplay(true);
+  }
+  if(GO.BtnSelect.isPressed()==1)
+  {
+    refresh=(refresh+1)&3;
+    MLX90640_SetRefreshRate(MLX90640_address,refresh);
+    delay(100 + (500 << refresh));
+    getirframe();
     drawtodisplay(true);
   }
   if(GO.BtnStart.isPressed()==1)
@@ -90,16 +127,18 @@ void loop()
       drawtodisplay(true);
     }
   }
+  delay(50);
   if(GO.JOY_Y.isAxisPressed()==1)
   {
     if(boxy<23 && dooverlay==true)
     {
+      while(GO.JOY_Y.isAxisPressed()!=0){GO.update();delay(50);}
       boxy++;
       drawtodisplay(false);
       delay(50);
     }
   }
-  if(GO.JOY_Y.isAxisPressed()==2)
+  else if(GO.JOY_Y.isAxisPressed()==2)
   {
     if(boxy>0 && dooverlay==true)
     {
@@ -109,7 +148,7 @@ void loop()
       delay(50);
     }
   }
-  if(GO.JOY_X.isAxisPressed()==1)
+  else if(GO.JOY_X.isAxisPressed()==1)
   {
     if(boxx<31 && dooverlay==true)
     {
@@ -119,7 +158,7 @@ void loop()
       delay(50);
     }
   }
-  if(GO.JOY_X.isAxisPressed()==2)
+  else if(GO.JOY_X.isAxisPressed()==2)
   {
     if(boxx>0 && dooverlay==true)
     {
@@ -131,11 +170,27 @@ void loop()
   }
 }
 
+/* map an intensity from 0 to 255 to an RGB value using the NASA/IPAC colors using 6 equal steps */
+uint16_t intensity_to_rgb(uint16_t col)
+{
+  uint16_t r,g,b;
+  switch(col)
+  {
+    case   0 ...  41: r=0; g=85; b=map(col,0,41,20,140); break;
+    case  42 ... 127: r=map(col,41,128,0,255); g=0; b=map(col,41,128,140,80); break;
+    case 128 ... 169: r=255; g=map(col,128,170,0,60); b=map(col,128,170,80,0); break;
+    case 170 ... 212: r=255; g=map(col,170,212,60,235); b=0; break;
+    case 213 ... 255: r=255; g=map(col,212,255,235,255); b=map(col,212,255,0,255); break;
+    default: r=g=b=0; // never happens
+  }
+  return GO.lcd.color565(r,g,b);
+}
+
 void drawtodisplay(bool cls)
 {
-  uint16_t c,x,y,ind,val,r,g,b,col,mid;
+  uint16_t c,x,y,ind,col,cnt;
   uint16_t xw=10,yw=10,xoff=0,yoff=0;
-  float mn=99999,mx=-99999;
+  float mid,val,surround;
   if(dooverlay==true)
   {
     xw=7;
@@ -143,16 +198,31 @@ void drawtodisplay(bool cls)
     xoff=0;
     yoff=0;
   }
-  for(c=0;c<768;c++)
+  if(newscale)
   {
-    if(mlx90640To[c]>mx) mx=mlx90640To[c];
-    if(mlx90640To[c]<mn) mn=mlx90640To[c];
+    mn=300;
+    mx=-40;
+    for(c=0;c<768;c++)
+    {
+      if(mlx90640To[c]>mx) mx=mlx90640To[c];
+      if(mlx90640To[c]<mn) mn=mlx90640To[c];
+    }
   }
   mid=mlx90640To[((23-boxy)*32)+boxx];
-  mn=int(mn);
-  mx=int(mx+1);
-  if(mn<-30) mn=-30;
+  if (mid<-40) mid=-40;
+  if (mid>300) mid=300;
+  if(mn<-40) mn=-40;
   if(mx>300) mx=300;
+
+  switch (scale)
+  {
+    case 1: mn=0; mx=30; break;
+    case 2: mn=15; mx=35; break;
+    case 3: mn=25; mx=42; break;
+    case 4: mn=0; mx=100; break;
+    case 5: mn=-40; mx=300; break;
+  }
+
   if(cls==true) GO.lcd.clearDisplay();
   for(y=0;y<24;y++)
   {
@@ -160,10 +230,35 @@ void drawtodisplay(bool cls)
     {
       ind=(y*32)+x;
       val=mlx90640To[ind];
-      r=int(map(val,int(mn),int(mx),0,255));
-      g=0;
-      b=int(map(val,int(mn),int(mx),255,0));
-      col=GO.lcd.color565(r,g,b);
+      // average over surrounding pixels: make the 4 closest ones count for up
+      // to 50% of the value.
+      surround=0; cnt=0;
+      if (y>0)
+      {
+        surround+=mlx90640To[ind-32];
+        cnt++;
+      }
+      if (y<23)
+      {
+        surround+=mlx90640To[ind+32];
+        cnt++;
+      }
+      if (x>0)
+      {
+        surround+=mlx90640To[ind-1];
+        cnt++;
+      }
+      if (x<31)
+      {
+        surround+=mlx90640To[ind+1];
+        cnt++;
+      }
+      if (cnt>0)  val=(val+surround/8.0)/(1.0+cnt/8.0);
+      if (val<mn) val=mn;
+      if (val>mx) val=mx;
+      // map temp to 0..255
+      col=int(map(int(val*1000),int(mn*1000),int(mx*1000),0,255));
+      col=intensity_to_rgb(col);
       GO.lcd.fillRect(xoff+(x*xw),yoff+((24*yw)-(y*yw)),xw,yw,col);
     }
   }
@@ -173,19 +268,32 @@ void drawtodisplay(bool cls)
     GO.lcd.setTextFont(2);
     GO.lcd.setTextSize(1);
     GO.lcd.setTextDatum(ML_DATUM);
-    GO.lcd.setTextColor(MAGENTA,BLACK);
-    GO.lcd.drawNumber(int(mx),255,yoff+15);
-    GO.lcd.setTextColor(CYAN,BLACK);
-    GO.lcd.drawNumber(int(mn),255,yoff+(24*yw)-2);
     GO.lcd.setTextColor(WHITE,BLACK);
-    GO.lcd.drawFloat(mid,1,255,yoff+((24*yw)/2)+yw);
-    GO.lcd.drawRect(xoff+(boxx*xw),yoff+(boxy*yw),xw,yw,WHITE);
+    GO.lcd.drawFloat(mx,3,255,yoff+15);
+    GO.lcd.setTextColor(BLUE,BLACK);
+    GO.lcd.drawFloat(mn,3,255,yoff+(24*yw)-2);
+    GO.lcd.setTextColor(GREEN,BLACK);
+    GO.lcd.drawFloat(mid,3,255,yoff+((24*yw)/2)+yw);
+
+    for (y=yoff+7; y<yoff+24*yw+7; y++)
+    {
+      col=map(y,yoff+7,yoff+24*yw+7,255,0);
+      col=intensity_to_rgb(col);
+      GO.lcd.drawLine(235,y,245,y,col);
+    }
+    GO.lcd.drawRect(234,yoff+7,12,24*yw,WHITE);
+
+    GO.lcd.drawRect(xoff+(boxx*xw),yoff+((boxy+1)*yw),xw,yw,GREEN);
     // Draw button labels
     GO.lcd.setTextFont(2);
     GO.lcd.setTextSize(1);
     GO.lcd.setTextColor(BLACK,WHITE);
     GO.lcd.setTextDatum(ML_DATUM);
     GO.lcd.drawString(" ZOOM ",0,230);
+    GO.lcd.setTextDatum(MC_DATUM);
+    GO.lcd.drawString(scales[scale],100,230);
+    GO.lcd.setTextDatum(MC_DATUM);
+    GO.lcd.drawString(rates[refresh],220,230);
     if(saved==false && havesd==true)
     {
       GO.lcd.setTextDatum(MR_DATUM);
