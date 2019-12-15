@@ -188,9 +188,9 @@ uint16_t intensity_to_rgb(uint16_t col)
 
 void drawtodisplay(bool cls)
 {
-  uint16_t c,x,y,ind,col;
+  uint16_t c,x,y,ind,col,cnt;
   uint16_t xw=10,yw=10,xoff=0,yoff=0;
-  float mid,val;
+  float mid,val,surround;
   if(dooverlay==true)
   {
     xw=7;
@@ -230,6 +230,30 @@ void drawtodisplay(bool cls)
     {
       ind=(y*32)+x;
       val=mlx90640To[ind];
+      // average over surrounding pixels: make the 4 closest ones count for up
+      // to 50% of the value.
+      surround=0; cnt=0;
+      if (y>0)
+      {
+        surround+=mlx90640To[ind-32];
+        cnt++;
+      }
+      if (y<23)
+      {
+        surround+=mlx90640To[ind+32];
+        cnt++;
+      }
+      if (x>0)
+      {
+        surround+=mlx90640To[ind-1];
+        cnt++;
+      }
+      if (x<31)
+      {
+        surround+=mlx90640To[ind+1];
+        cnt++;
+      }
+      if (cnt>0)  val=(val+surround/8.0)/(1.0+cnt/8.0);
       if (val<mn) val=mn;
       if (val>mx) val=mx;
       // map temp to 0..255
