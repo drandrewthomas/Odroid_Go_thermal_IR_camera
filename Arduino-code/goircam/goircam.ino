@@ -59,8 +59,8 @@ void setup()
   GO.lcd.setTextColor(WHITE);
   GO.lcd.setTextDatum(MC_DATUM);
 //  GO.lcd.setCursor(160,120);
-  GO.lcd.drawString("IR Camera v1.0",160,120);
-  delay(1000);
+  GO.lcd.drawString("IR Camera v1.1",160,120);
+  delay(500);
   getirframe();
   drawtodisplay(true);
   Serial.println("Setup done");
