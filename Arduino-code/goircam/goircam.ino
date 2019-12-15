@@ -15,11 +15,14 @@ paramsMLX90640 mlx90640;
 BluetoothSerial serialBT;
 
 const char *rates[4]={ " .5Hz ", " 1 Hz ", " 2 Hz ", " 4 Hz " };
+// temp scales: auto, outdoor, indoor, body, water, full
+const char *scales[]={ " auto ", " 0-30 ", "15-35 ", "25-42 ", " 0-100", " full " };
 
 bool dooverlay=true,saved=false,havesd=false;
 int boxx=16,boxy=12;
 long gottime,firstsave=-1;
 int refresh=3; // 4 Hz by default
+int scale=0; // auto by default
 int newscale=1;
 float mn=-40,mx=300;
 
@@ -100,6 +103,11 @@ void loop()
     if(dooverlay==true) dooverlay=false;
     else dooverlay=true;
     GO.lcd.clearDisplay();
+    drawtodisplay(true);
+  }
+  if(GO.BtnVolume.isPressed()==1)
+  {
+    scale=(scale+1)%(sizeof(scales)/sizeof(scales[0]));
     drawtodisplay(true);
   }
   if(GO.BtnSelect.isPressed()==1)
@@ -205,6 +213,16 @@ void drawtodisplay(bool cls)
   if (mid>300) mid=300;
   if(mn<-40) mn=-40;
   if(mx>300) mx=300;
+
+  switch (scale)
+  {
+    case 1: mn=0; mx=30; break;
+    case 2: mn=15; mx=35; break;
+    case 3: mn=25; mx=42; break;
+    case 4: mn=0; mx=100; break;
+    case 5: mn=-40; mx=300; break;
+  }
+
   if(cls==true) GO.lcd.clearDisplay();
   for(y=0;y<24;y++)
   {
@@ -248,6 +266,8 @@ void drawtodisplay(bool cls)
     GO.lcd.setTextColor(BLACK,WHITE);
     GO.lcd.setTextDatum(ML_DATUM);
     GO.lcd.drawString(" ZOOM ",0,230);
+    GO.lcd.setTextDatum(MC_DATUM);
+    GO.lcd.drawString(scales[scale],100,230);
     GO.lcd.setTextDatum(MC_DATUM);
     GO.lcd.drawString(rates[refresh],220,230);
     if(saved==false && havesd==true)
