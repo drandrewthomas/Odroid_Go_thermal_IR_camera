@@ -20,6 +20,8 @@ bool dooverlay=true,saved=false,havesd=false;
 int boxx=16,boxy=12;
 long gottime,firstsave=-1;
 int refresh=3; // 4 Hz by default
+int newscale=1;
+float mn=-40,mx=300;
 
 void setup()
 {
@@ -84,7 +86,14 @@ void loop()
   {
     getirframe();
     drawtodisplay(true);
+    newscale=0;
   }
+  else
+  {
+    // only change the color scale when button is released
+    newscale=1;
+  }
+
   if(GO.BtnMenu.isPressed()==1)
   {
     while(GO.BtnMenu.isPressed()==1){GO.update();delay(50);}
@@ -173,7 +182,7 @@ void drawtodisplay(bool cls)
 {
   uint16_t c,x,y,ind,col;
   uint16_t xw=10,yw=10,xoff=0,yoff=0;
-  float mn=99999,mx=-99999,mid,val;
+  float mid,val;
   if(dooverlay==true)
   {
     xw=7;
@@ -181,10 +190,15 @@ void drawtodisplay(bool cls)
     xoff=0;
     yoff=0;
   }
-  for(c=0;c<768;c++)
+  if(newscale)
   {
-    if(mlx90640To[c]>mx) mx=mlx90640To[c];
-    if(mlx90640To[c]<mn) mn=mlx90640To[c];
+    mn=300;
+    mx=-40;
+    for(c=0;c<768;c++)
+    {
+      if(mlx90640To[c]>mx) mx=mlx90640To[c];
+      if(mlx90640To[c]<mn) mn=mlx90640To[c];
+    }
   }
   mid=mlx90640To[((23-boxy)*32)+boxx];
   if (mid<-40) mid=-40;
@@ -198,8 +212,8 @@ void drawtodisplay(bool cls)
     {
       ind=(y*32)+x;
       val=mlx90640To[ind];
-      if (val<-40) val=-40;
-      if (val>300) val=300;
+      if (val<mn) val=mn;
+      if (val>mx) val=mx;
       // map temp to 0..255
       col=int(map(int(val*1000),int(mn*1000),int(mx*1000),0,255));
       col=intensity_to_rgb(col);
