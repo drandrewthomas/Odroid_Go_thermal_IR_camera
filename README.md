@@ -1,8 +1,21 @@
 # Odroid Go thermal infrared camera
 
+## Update 28th April 2020: The firmware has been updated to v1.1, with lots of new features and improvements!
+
 ## Introduction
 
-This is a simple IR (infrared) thermal camera project for the Odroid Go handheld ESP32 system. It allows saving of data to an SD card as well as having a basic Bluetooth interface to wirelessly get data off the camera to a computer, tablet or mobile phone. It's based on the MLX90640 32x24 pixel infrared thermal array modules that you can get relatively inexpensively many places online. Below is a photo of it in action.
+This is a simple, yet very useful, IR (infrared) thermal camera project for the Odroid Go handheld ESP32 system. It allows saving of data to an SD card as well as having a Bluetooth interface to wirelessly get data off the camera to a computer, tablet or mobile phone. It's based on the MLX90640 32x24 pixel infrared thermal array modules that you can get relatively inexpensively many places online. Here's a short list of some of it's features:
+
+* Onscreen display of the IR image, with a movable cursor to let you query the temperature for any single pixel (press up, down, left and right on the + control to move the cursor).
+* A range of colour maps, which are easily added to in the Arduino code.
+* A zoom function so you can switch the IR image full-screen mode.
+* Saving of data to the SD card on your ODroid GO as CSV data for later analysis.
+* A fever screening colour map, which shows temperatures above 36C in red to indicate when checking for a fever may be necessary.
+* In fever checking mode IR images with temperatures above 36C are indicated by an audible beep, to help with rapid screening.
+* An on-screen battery indicator, so you know when to recharge the GO.
+* A Bluetooth interface that lets you take full control of the IR camera, including transferring the IR data to a PC as ASCII text or binary data.
+
+Below is a photo of the project in action on an Odroid GO:
 
 ![The thermal camera in action](https://github.com/drandrewthomas/Odroid_Go_thermal_IR_camera/blob/master/Photos/cupheat.jpg)
 
