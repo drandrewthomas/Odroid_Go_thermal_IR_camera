@@ -8,11 +8,11 @@ This is a simple, yet very useful, IR (infrared) thermal camera project for the 
 
 * Onscreen display of the IR image, with a movable cursor to let you query the temperature for any single pixel (press up, down, left and right on the + control to move the cursor).
 * A range of colour maps, which are easily added to in the Arduino code.
-* A zoom function so you can switch the IR image full-screen mode.
-* Saving of data to the SD card on your ODroid GO as CSV data for later analysis.
-* A fever screening colour map, which shows temperatures above 36C in red to indicate when checking for a fever may be necessary.
-* In fever checking mode IR images with temperatures above 36C are indicated by an audible beep, to help with rapid screening.
-* An on-screen battery indicator, so you know when to recharge the GO.
+* A zoom button so you can switch the IR image to/from full-screen mode.
+* Saving of data to the SD card on your ODroid GO in text CSV format for later analysis.
+* A fever screening colour map, which shows temperatures above 36C in red to indicate when checking for a fever may be necessary (not for medical diagnosis).
+* In fever checking mode IR images with temperatures above 36C are indicated by an audible beep, to help with rapid screening of your family and friends.
+* An on-screen battery indicator, so you know when to recharge your GO.
 * A Bluetooth interface that lets you take full control of the IR camera, including transferring the IR data to a PC as ASCII text or binary data.
 
 Below is a photo of the project in action on an Odroid GO:
