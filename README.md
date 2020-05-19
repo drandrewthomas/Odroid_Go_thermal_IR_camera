@@ -14,6 +14,7 @@ This is a simple, yet very useful, IR (infrared) thermal camera project for the 
 * In fever checking mode IR images with temperatures above 36C are indicated by an audible beep, to help with rapid screening of your family and friends.
 * An on-screen battery indicator, so you know when to recharge your GO.
 * A Bluetooth interface that lets you take full control of the IR camera, including transferring the IR data to a PC as ASCII text or binary data.
+* 3D printing STL files to make a forward-facing or rear-facing case to protect your thermal IR module.
 
 Below is a photo of the project in action on an Odroid GO:
 
@@ -44,7 +45,7 @@ Once you've got things wired up and tested, the simplicity of the circuit makes 
 
 ## Making a 3D printed enclosure
 
-The 'Case 3D model' folder includes a couple of files I used to make a 3D printed enclosure. One is a ready to print STL file, but is designed for the Pimoroni MLX90640 module I used. If that doesn't work for your needs, or the MLX90640 module you have, the OpenSCAD file is included so you can make a custom version. The camera module fits in as shown in the photo above, which also shows the correct orientation for the module. By cutting the veroboard to the right size it fitted perfectly into the back of the enclosure, leaving the header pins properly positioned as shown in the photo below. The veroboard was glued in, and it's necessary to check the pins as the glue goes off to make sure they stay perpendicular to the enclosure.
+The 'Case 3D model' folder includes files I used to make 3D printed enclosures. The STL files are designed for the Pimoroni MLX90640 module I used. If that doesn't work for your needs, or the MLX90640 module you have, the OpenSCAD files are included so you can make a custom version. By cutting the veroboard to the right size the IR module should fit perfectly into the back of the enclosure, leaving the header pins properly positioned as shown in the front-facing example photo below. The veroboard was glued in, and it's necessary to check the pins as the glue goes off to make sure they stay perpendicular to the enclosure.
 
 ![A photo of the back of the enclosure showing the header pins glued in](https://github.com/drandrewthomas/Odroid_Go_thermal_IR_camera/blob/master/Photos/caseback.jpg)
 
@@ -56,4 +57,6 @@ The Odroid Go Wiki is a useful resource for all Go things: [https://wiki.odroid.
 
 The Wiki page for a 16x2 I2C LCD project contains details of how to connect an I2C module to the Go header: [https://wiki.odroid.com/odroid_go/arduino/09_16x2lcd_i2c](https://wiki.odroid.com/odroid_go/arduino/09_16x2lcd_i2c)
 
-The 3D printed case can also be downloaded from Thingiverse: [https://www.thingiverse.com/thing:3648653](https://www.thingiverse.com/thing:3648653)
+The front facing 3D printed case can also be downloaded from Thingiverse: [https://www.thingiverse.com/thing:3648653](https://www.thingiverse.com/thing:3648653)
+
+And the rear facing 3D printed case can also be downloaded from MyMiniFactory: [https://www.myminifactory.com/object/3d-print-odroid-go-thermal-infrared-ir-camera-ideal-for-covid-coronavirus-screening-122446](https://www.myminifactory.com/object/3d-print-odroid-go-thermal-infrared-ir-camera-ideal-for-covid-coronavirus-screening-122446)
